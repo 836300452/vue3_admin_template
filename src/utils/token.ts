@@ -7,6 +7,9 @@ export const SET_TOKEN = (token: string) => {
 export const GET_TOKEN = () => {
   return localStorage.getItem('TOKEN')
 }
+export const GET_TOKEN2 = () => {
+  return localStorage.getItem('TOKEN')
+}
 //本地存储删除数据方法
 export const REMOVE_TOKEN = () => {
   localStorage.removeItem('TOKEN')
