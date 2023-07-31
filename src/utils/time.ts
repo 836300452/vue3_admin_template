@@ -4,6 +4,7 @@ export const getTime = () => {
   //通过内置构造函数Date
   const hours = new Date().getHours()
   //情况的判断
+
   if (hours <= 9) {
     message = '早上'
   } else if (hours <= 12) {
