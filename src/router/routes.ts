@@ -32,8 +32,20 @@ export const constantRoute = [
           icon: 'HomeFilled',
         },
       },
+      {
+        //拖拽功能
+        path: '/drag',
+        component: () => import('@/views/drag/index.vue'),
+        name: 'drag',
+        meta: {
+          title: '拖拽',
+          hidden: false,
+          icon: 'Platform',
+        },
+      },
     ],
   },
+
   {
     //404
     path: '/404',
