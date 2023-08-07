@@ -16,7 +16,7 @@
               <div
                 class="coordinate-map"
                 ref="coordinateMap"
-                @mousewheel.prevent.stop="wheelhandle"
+                @mousewheel.prevent.stop="wheelShowAll"
                 @mousedown.prevent.stop="drag"
                 :style="mapStyle"
               >
@@ -39,6 +39,7 @@
                   >
                     <Aim />
                   </el-icon>
+                  <!-- 点位名字 -->
                   <div v-show="showPointTitle" :class="{ 'point-title': true }">
                     <span
                       :style="{
@@ -65,7 +66,6 @@
 import { ref, computed, nextTick } from 'vue'
 let drawUrl = ref('../../../public/Images/dragImg.jpg')
 let showMap = ref(false)
-let showMapType = ref('showAll')
 let pointLists = ref([
   {
     pointX: 0.287,
@@ -133,53 +133,25 @@ const initPointMap = () => {
   let drawNaturalWidth = drawingImageRef.value.naturalWidth //图片原始宽
   let drawNaturalHeight = drawingImageRef.value.naturalHeight //图片原始高
   let imgPanelWHRate = imgPanelW / imgPanelH //图片容器的宽高比率
-  let drawNaturalWHRate = drawNaturalWidth / drawNaturalHeight //图片容器的宽高比率
-
-  //满屏模式
-  if (showMapType.value == 'fullScreen') {
-    //当容器宽高比 高于原图
-    if (imgPanelWHRate >= drawNaturalWHRate) {
-      drawingImageRef.value.style.width = imgPanelW + 'px'
-      drawingImageRef.value.style.height =
-        (drawNaturalHeight / drawNaturalWidth) * imgPanelW + 'px'
-      width.value = imgPanelW
-      height.value = (drawNaturalHeight / drawNaturalWidth) * imgPanelW
-      top.value =
-        -(drawingImageRef.value.offsetHeight - imgPanelRef.value.offsetHeight) /
-        2
-      left.value = 0
-    } else {
-      drawingImageRef.value.style.height = imgPanelH + 'px'
-      drawingImageRef.value.style.width =
-        (drawNaturalWidth / drawNaturalHeight) * imgPanelH + 'px'
-      width.value = (drawNaturalWidth / drawNaturalHeight) * imgPanelH
-      height.value = imgPanelH
-      top.value = 0
-      left.value =
-        -(drawingImageRef.value.offsetWidth - imgPanelRef.value.offsetWidth) / 2
-    }
-  } else if (showMapType.value == 'showAll') {
-    if (imgPanelWHRate >= drawNaturalWHRate) {
-      drawingImageRef.value.style.width =
-        (drawNaturalWidth / drawNaturalHeight) * imgPanelH + 'px'
-      drawingImageRef.value.style.height = imgPanelH + 'px'
-      width.value = (drawNaturalWidth / drawNaturalHeight) * imgPanelH
-      height.value = imgPanelH
-      left.value =
-        -(drawingImageRef.value.offsetWidth - imgPanelRef.value.offsetWidth) / 2
-      top.value = 0
-    } else {
-      drawingImageRef.value.style.width = imgPanelW + 'px'
-      drawingImageRef.value.style.height =
-        (drawNaturalHeight / drawNaturalWidth) * imgPanelW + 'px'
-      width.value = imgPanelW
-      height.value = (drawNaturalHeight / drawNaturalWidth) * imgPanelW
-      left.value = 0
-      top.value =
-        -(drawingImageRef.value.offsetHeight - imgPanelRef.value.offsetHeight) /
-        2
-      // + 'px'
-    }
+  let drawNaturalWHRate = drawNaturalWidth / drawNaturalHeight //图片的宽高比率
+  // 图片容器的宽高比率 > 图片的宽高比率
+  if (imgPanelWHRate >= drawNaturalWHRate) {
+    drawingImageRef.value.style.width = drawNaturalWHRate * imgPanelH + 'px' //图片的宽高比率 * 高度
+    drawingImageRef.value.style.height = imgPanelH + 'px' // 因为容器的高大于图片高，所以把容器的高赋值给图片
+    width.value = drawNaturalWHRate * imgPanelH
+    height.value = imgPanelH
+    left.value =
+      (imgPanelRef.offsetWidth - drawingImageRef.value.offsetWidth) / 2 //为了图片显示居中，算容器的宽度-图片的宽度
+    top.value = 0
+  } else {
+    drawingImageRef.value.style.width = imgPanelW + 'px'
+    drawingImageRef.value.style.height =
+      (drawNaturalHeight / drawNaturalWidth) * imgPanelW + 'px'
+    width.value = imgPanelW
+    height.value = (drawNaturalHeight / drawNaturalWidth) * imgPanelW
+    left.value = 0
+    top.value =
+      (imgPanelRef.value.offsetHeight - drawingImageRef.value.offsetHeight) / 2 //为了图片显示居中，算容器的宽度-图片的宽度
   }
 }
 // 拖拽事件
@@ -215,18 +187,6 @@ const drag = (el: { currentTarget: any }) => {
       } else {
         t = e.clientY - disY
       }
-      if (showMapType.value == 'fullScreen') {
-        if (t > 0) {
-          t = 0
-        } else if (t < 0 && t < imgPanelH - oDiv.clientHeight) {
-          t = imgPanelH - oDiv.clientHeight
-        }
-        if (l > 0) {
-          l = 0
-        } else if (l <= 0 && l < imgPanelW - oDiv.clientWidth) {
-          l = imgPanelW - oDiv.clientWidth
-        }
-      }
 
       //移动当前元素
       oDiv.style.left = l + 'px'
@@ -241,97 +201,7 @@ const drag = (el: { currentTarget: any }) => {
     }
   }
 }
-// 全屏模式放大缩小事件
-const wheelFullScreen = (event: any) => {
-  let imgPanelRef = imgPanel.value //容器ref
-  if (!imgPanelRef) return
-  let imgPanelW = imgPanelRef.clientWidth //图片容器的宽
-  let imgPanelH = imgPanelRef.clientHeight //图片容器的高
-  let drawingImageRef = drawingImage.value //原图ref
-  let drawNaturalWidth = drawingImageRef.naturalWidth //图片原始宽
-  let drawNaturalHeight = drawingImageRef.naturalHeight //图片原始高
-  let imgPanelWHRate = imgPanelW / imgPanelH //图片容器的宽高比率
-  let drawNaturalWHRate = drawNaturalWidth / drawNaturalHeight //图片容器的宽高比率
-  //wheelDelta统一为±120，其中正数表示为向上滚动，负数表示向下滚动
-  let x = event.offsetX //离坐标盘的起始点X
-  let y = event.offsetY //离坐标盘的起始点Y
-  let speed = event.wheelDelta / 12 || (-event.detail * 10) / 30 //滚轮的步长
-  let enlarge = speed > 0 ? 1 : -1 //是缩小还是放大 1放大 -1缩小
-  let mapWidth = width.value //坐标盘宽
-  let mapHeight = height.value //坐标盘高
-  let mapLeft = left.value //坐标盘左偏移量
-  let mapTop = top.value //坐标盘上偏移量
-  //放大
-  if (enlarge > 0) {
-    if (imgPanelWHRate >= drawNaturalWHRate) {
-      if (mapWidth <= imgPanelW * zoomMaxRate.value) {
-        let newX = -x * zoomDifference.value //偏移量X
-        let newY = -y * zoomDifference.value //偏移量Y
-        width.value = mapWidth * zoomRate.value //放大后的坐标盘
-        height.value = mapHeight * zoomRate.value //放大后的坐标盘
-        let tempLeft = Number(mapLeft) + newX //坐标盘向左偏移
-        let tempTop = Number(mapTop) + newY //坐标盘向上偏移
-        tempLeft = tempLeft > 0 ? 0 : tempLeft //校正坐标盘脱离0,0 强制置于0,0
-        tempTop = tempTop > 0 ? 0 : tempTop //校正坐标盘脱离0,0 强制置于0,0
-        left.value = tempLeft
-        top.value = tempTop
-      } else {
-        let newX = -x * zoomDifference.value //偏移量X
-        let newY = -y * zoomDifference.value //偏移量Y
-        width.value = mapWidth * zoomRate.value //放大后的坐标盘
-        height.value = mapHeight * zoomRate.value //放大后的坐标盘
-        let tempLeft = Number(mapLeft) + newX //坐标盘向左偏移
-        let tempTop = Number(mapTop) + newY //坐标盘向上偏移
-        tempLeft = tempLeft > 0 ? 0 : tempLeft //校正坐标盘脱离0,0 强制置于0,0
-        tempTop = tempTop > 0 ? 0 : tempTop //校正坐标盘脱离0,0 强制置于0,0
-        left.value = tempLeft
-        top.value = tempTop
-      }
-    } else {
-      if (mapHeight <= imgPanelH * zoomMaxRate.value) {
-        let newX = -x * zoomDifference.value
-        let newY = -y * zoomDifference.value
-        width.value = mapWidth * zoomRate.value
-        height.value = mapHeight * zoomRate.value
-        let tempLeft = Number(mapLeft) + newX
-        let tempTop = Number(mapTop) + newY
-        tempLeft = tempLeft > 0 ? 0 : tempLeft
-        tempTop = tempTop > 0 ? 0 : tempTop
-        left.value = tempLeft
-        top.value = tempTop
-      }
-    }
-  } else {
-    if (imgPanelWHRate >= drawNaturalWHRate) {
-      if (parseInt(imgPanelW) < mapWidth) {
-        width.value = mapWidth / zoomRate.value
-        height.value = mapHeight / zoomRate.value
-        let newX = x - x / zoomRate.value
-        let newY = y - y / zoomRate.value
-        let tempLeft = Number(mapLeft) + newX
-        let tempTop = Number(mapTop) + newY
 
-        tempLeft = tempLeft > 0 ? 0 : tempLeft
-        tempTop = tempTop > 0 ? 0 : tempTop
-        left.value = tempLeft
-        top.value = tempTop
-      }
-    } else {
-      if (parseInt(imgPanelH) < mapHeight) {
-        width.value = mapWidth / zoomRate.value
-        height.value = mapHeight / zoomRate.value
-        let newX = x - x / zoomRate.value
-        let newY = y - y / zoomRate.value
-        let tempLeft = Number(mapLeft) + newX
-        let tempTop = Number(mapTop) + newY
-        tempLeft = tempLeft > 0 ? 0 : tempLeft
-        tempTop = tempTop > 0 ? 0 : tempTop
-        left.value = tempLeft
-        top.value = tempTop
-      }
-    }
-  }
-}
 // 没全屏模式放大缩小事件
 const wheelShowAll = (event: any) => {
   let imgPanelRef = imgPanel.value //容器ref
@@ -341,7 +211,7 @@ const wheelShowAll = (event: any) => {
   let drawNaturalWidth = drawingImageRef.value.naturalWidth //图片原始宽
   let drawNaturalHeight = drawingImageRef.value.naturalHeight //图片原始高
   let imgPanelWHRate = imgPanelW / imgPanelH //图片容器的宽高比率
-  let drawNaturalWHRate = drawNaturalWidth / drawNaturalHeight //图片容器的宽高比率
+  let drawNaturalWHRate = drawNaturalWidth / drawNaturalHeight //图片的宽高比率
   //wheelDelta统一为±120，其中正数表示为向上滚动，负数表示向下滚动
   let x = event.offsetX //离坐标盘的起始点X
   let y = event.offsetY //离坐标盘的起始点Y
@@ -355,12 +225,11 @@ const wheelShowAll = (event: any) => {
   if (enlarge > 0) {
     let newX = -x * zoomDifference.value //偏移量X
     let newY = -y * zoomDifference.value //偏移量Y
-    console.log('zoomRate.value', zoomRate.value)
 
     width.value = mapWidth.value * zoomRate.value //放大后的坐标盘
     height.value = mapHeight.value * zoomRate.value //放大后的坐标盘
-    let tempLeft = Number(mapLeft) + newX //坐标盘向左偏移
-    let tempTop = Number(mapTop) + newY //坐标盘向上偏移
+    let tempLeft = mapLeft.value + newX //坐标盘向左偏移
+    let tempTop = mapTop.value + newY //坐标盘向上偏移
     left.value = tempLeft
     top.value = tempTop
   }
@@ -372,8 +241,8 @@ const wheelShowAll = (event: any) => {
         height.value = mapHeight.value / zoomRate.value
         let newX = x - x / zoomRate.value
         let newY = y - y / zoomRate.value
-        let tempLeft = Number(mapLeft) + newX
-        let tempTop = Number(mapTop) + newY
+        let tempLeft = mapLeft.value + newX
+        let tempTop = mapTop.value + newY
         tempLeft = tempLeft > 0 ? 0 : tempLeft
         left.value = tempLeft
         top.value = tempTop
@@ -384,8 +253,8 @@ const wheelShowAll = (event: any) => {
         height.value = mapHeight.value / zoomRate.value
         let newX = x - x / zoomRate.value
         let newY = y - y / zoomRate.value
-        let tempLeft = Number(mapLeft) + newX
-        let tempTop = Number(mapTop) + newY
+        let tempLeft = mapLeft.value + newX
+        let tempTop = mapTop.value + newY
         tempTop = tempTop > 0 ? 0 : tempTop
         left.value = tempLeft
         top.value = tempTop
@@ -393,13 +262,10 @@ const wheelShowAll = (event: any) => {
     }
   }
 }
+// 拖拽时先判断是否全屏状态
 const wheelhandle = (event: any) => {
-  //满屏模式
-  if (showMapType.value == 'fullScreen') {
-    wheelFullScreen(event)
-  } else if (showMapType.value == 'showAll') {
-    wheelShowAll(event)
-  }
+  wheelShowAll(event)
+
   return false
 }
 //初始化
