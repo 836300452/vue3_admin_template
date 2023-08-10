@@ -215,6 +215,15 @@ const wheelShowAll = (event: any) => {
   //wheelDelta统一为±120，其中正数表示为向上滚动，负数表示向下滚动
   let x = event.offsetX //离坐标盘的起始点X
   let y = event.offsetY //离坐标盘的起始点Y
+
+  //为了兼容鼠标放在点位上位置不一
+  let pointTarget = event.target.closest('.device-point')
+  if (pointTarget) {
+    let { offsetLeft, offsetTop } = pointTarget
+    x = offsetLeft
+    y = offsetTop
+  }
+
   let speed = event.wheelDelta / 12 || (-event.detail * 10) / 30 //滚轮的步长
   let enlarge = speed > 0 ? 1 : -1 //是缩小还是放大 1放大 -1缩小
   let mapWidth = width //坐标盘宽
