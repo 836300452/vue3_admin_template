@@ -217,7 +217,9 @@ const wheelShowAll = (event: any) => {
   let y = event.offsetY //离坐标盘的起始点Y
 
   //为了兼容鼠标放在点位上位置不一
-  let pointTarget = event.target.closest('.device-point')
+  console.log()
+
+  let pointTarget = event.target.closest('.mask-point')
   if (pointTarget) {
     let { offsetLeft, offsetTop } = pointTarget
     x = offsetLeft
