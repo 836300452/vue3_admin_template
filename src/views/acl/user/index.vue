@@ -304,10 +304,8 @@ const save = async () => {
       type: 'success',
       message: userParams.id ? '更新成功' : '添加成功',
     })
-    //获取最新的全部账号的信息
-    // getHasUser(userParams.id ? pageNo.value : 1);
-    //浏览器自动刷新一次
-    window.location.reload()
+    //操作成功则重新掉用接口
+    getHasUser()
   } else {
     //关闭抽屉
     drawer.value = false
@@ -444,8 +442,6 @@ const deleteSelectUser = async () => {
 const search = () => {
   //根据关键字获取相应的用户数据
   getHasUser()
-  //清空关键字
-  keyword.value = ''
 }
 //重置按钮
 const reset = () => {

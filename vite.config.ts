@@ -42,9 +42,25 @@ export default defineConfig(({ command, mode }) => {
           //获取数据的服务器地址设置
           target: env.VITE_SERVE,
           //需要代理跨域
+          changeOrigin: false,
+          //路径重写 把api开头的去掉
+          // rewrite: (path) => path.replace(/^\/api/, ''),
+        },
+        '/map': {
+          //获取数据的服务器地址设置
+          target: 'https://bang.360.cn',
+          //需要代理跨域
           changeOrigin: true,
-          //路径重写
-          rewrite: (path) => path.replace(/^\/api/, ''),
+          //路径重写 把map开头的去掉
+          rewrite: (path) => path.replace(/^\/map/, ''),
+        },
+        '/geo': {
+          //获取数据的服务器地址设置
+          target: 'https://restapi.amap.com',
+          //需要代理跨域
+          changeOrigin: true,
+          //路径重写 把map开头的去掉
+          rewrite: (path) => path.replace(/^\/geo/, ''),
         },
       },
     },

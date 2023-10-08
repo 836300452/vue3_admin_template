@@ -18,7 +18,6 @@
                 ref="coordinateMap"
                 @mousewheel.prevent.stop="wheelShowAll"
                 @mousedown.prevent.stop="drag"
-                @mouseenter="mouseenter"
                 :style="mapStyle"
               >
                 <!-- 点位开始 -->
@@ -56,32 +55,6 @@
                 <!-- 点位结束 -->
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="dashboard-edit">
-      <p>操作</p>
-      <div
-        class="edit-container"
-        @mousedown="mouseDownEdit"
-        @mousemove="mouseMoveEdit"
-        @mouseup="isPointerdown = false"
-        @mousewheel="mousewheelEdit"
-      >
-        <div
-          class="item"
-          @dragstart.native="dragstart"
-          @dragenter.native="dragenter($event, index)"
-          @dragover.prevent
-          draggable
-          @drop="dragEvent"
-        >
-          <div>设备</div>
-          <div>
-            <el-icon @mousedown.stop="handleMouseDownOnElement($event)">
-              <Aim />
-            </el-icon>
           </div>
         </div>
       </div>
@@ -191,6 +164,11 @@ const drag = (el: { currentTarget: any }) => {
     //鼠标按下，计算当前元素距离可视区的距离
     let disX = e.clientX - oDiv.offsetLeft
     let disY = e.clientY - oDiv.offsetTop
+    console.log('bw', bw)
+    console.log('bh', bh)
+    console.log('disX', disX)
+    console.log('disY', disY)
+
     // 计算两边坐标
     document.onmousemove = function (e) {
       let l = 0,
@@ -226,7 +204,7 @@ const drag = (el: { currentTarget: any }) => {
   }
 }
 
-// 放大缩小事件
+// 没全屏模式放大缩小事件
 const wheelShowAll = (event: any) => {
   let imgPanelRef = imgPanel.value //容器ref
   let imgPanelW = imgPanelRef.clientWidth //图片容器的宽
@@ -239,10 +217,7 @@ const wheelShowAll = (event: any) => {
   //wheelDelta统一为±120，其中正数表示为向上滚动，负数表示向下滚动
   let x = event.offsetX //离坐标盘的起始点X
   let y = event.offsetY //离坐标盘的起始点Y
-
   //为了兼容鼠标放在点位上位置不一
-  console.log()
-
   let pointTarget = event.target.closest('.mask-point')
   if (pointTarget) {
     let { offsetLeft, offsetTop } = pointTarget
@@ -297,18 +272,11 @@ const wheelShowAll = (event: any) => {
     }
   }
 }
-const mouseenter = (e: any) => {
-  console.log('e', e)
-  let drawingImageRef = drawingImage //原图ref
-  let drawNaturalWidth = drawingImageRef.value.naturalWidth //图片原始宽
-  let drawNaturalHeight = drawingImageRef.value.naturalHeight //图片原始高
-  pointLists.push({
-    pointX: 0.387,
-    pointY: 0.628,
-    name: '1',
-    id: 220923,
-    alarmStatus: 1,
-  })
+// 拖拽时先判断是否全屏状态
+const wheelhandle = (event: any) => {
+  wheelShowAll(event)
+
+  return false
 }
 //初始化
 const loadDraw = () => {
@@ -353,79 +321,15 @@ const pointViewEvent = (index, e, item) => {
   console.log('item', item)
   // this.showPointView = true;
 }
-const dragstart = (e) => {
-  console.log('dragstart', e)
-}
-const dragenter = (e) => {
-  console.log('dragenter', e)
-}
-const handleMouseDownOnElement = (e) => {
-  console.log('handleMouseDownOnElement', e)
-}
-let isPointerdown = ref(false)
-let lastPointermove = reactive({ x: 0, y: 0 })
-const mouseDownEdit = (e) => {
-  isPointerdown.value = true
-  lastPointermove = { x: e.clientX, y: e.clientY }
-}
-let x = ref()
-let y = ref()
-const mouseMoveEdit = (e) => {
-  if (isPointerdown.value) {
-    const current = { x: e.clientX, y: e.clientY }
-    const diff = {
-      x: current.x - lastPointermove.x,
-      y: current.y - lastPointermove.y,
-    }
-    lastPointermove = current
-    x.value += diff.x
-    y.value += diff.y
-  }
-}
-const mousewheelEdit = (e) => {
-  // let { scale, x, y } = this
-  let ratio = 1.1
-
-  if (e.deltaY > 0) {
-    ratio = +(1 / 1.1).toFixed(1)
-  }
-  const _scale = scale * ratio
-
-  if (_scale > 3) {
-    ratio = 3 / scale
-    scale = 3
-  } else if (_scale < 1) {
-    ratio = 1 / scale
-    scale = 1
-  } else {
-    scale = _scale
-  }
-
-  if (e.target.className === 'editor-shell-item') {
-    const origin = {
-      x: (ratio - 1) * parseInt(this.width) * 0.5,
-      y: (ratio - 1) * parseInt(this.height) * 0.5,
-    }
-    // 计算偏移量
-    x.value -= (ratio - 1) * (e.offsetX - x.value) - origin.x
-    y.value -= (ratio - 1) * (e.offsetY - y.value) - origin.y
-  }
-  this.x = Math.round(x)
-  this.y = Math.round(y)
-  this.scale = scale
-}
-const dragEvent = () => {}
 </script>
 
 <style lang="scss" scoped>
 $footerHeight: 52px;
-$mainWidth: 85%;
 .dashboard-container {
   height: 100%;
   width: 100%;
-  display: flex;
   .dashboard-main {
-    width: $mainWidth;
+    width: 100%;
     height: calc(100% - #{$footerHeight});
     .map-canvas-panel {
       height: 100%;
@@ -568,23 +472,6 @@ $mainWidth: 85%;
             padding: 22px 17px;
           }
         }
-      }
-    }
-  }
-  .dashboard-edit {
-    width: calc(100 - #{$mainWidth});
-    height: calc(100% - #{$footerHeight});
-    padding: 10px;
-    .edit-container {
-      display: flex;
-      flex-wrap: wrap;
-      margin-top: 10px;
-      .item {
-        width: 60px;
-        height: 60px;
-        background: #d9d9d9;
-        text-align: center;
-        cursor: pointer;
       }
     }
   }

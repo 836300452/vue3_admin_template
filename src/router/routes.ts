@@ -33,12 +33,34 @@ export const constantRoute = [
         },
       },
       {
-        //拖拽功能
+        //展示拖拽
+        path: '/showDrag',
+        component: () => import('@/views/showDrag/index.vue'),
+        name: 'showDrag',
+        meta: {
+          title: '展示拖拽',
+          hidden: false,
+          icon: 'Platform',
+        },
+      },
+      {
+        //功能
         path: '/drag',
         component: () => import('@/views/drag/index.vue'),
         name: 'drag',
         meta: {
           title: '拖拽',
+          hidden: false,
+          icon: 'Platform',
+        },
+      },
+      {
+        //GIS
+        path: '/gis',
+        component: () => import('@/views/gis/index.vue'),
+        name: 'drag',
+        meta: {
+          title: 'gis',
           hidden: false,
           icon: 'Platform',
         },

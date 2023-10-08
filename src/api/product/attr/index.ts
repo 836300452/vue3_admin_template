@@ -4,17 +4,17 @@ import type { CategoryResponseData, AttrResponseData, Attr } from './type'
 //属性管理模块接口地址
 enum API {
   //获取一级分类接口地址
-  C1_URL = '/admin/product/getCategory1',
+  C1_URL = '/api/admin/product/getCategory1',
   //获取二级分类接口地址
-  C2_URL = '/admin/product/getCategory2/',
+  C2_URL = '/api/admin/product/getCategory2/',
   //获取三级分类接口地址
-  C3_URL = '/admin/product/getCategory3/',
+  C3_URL = '/api/admin/product/getCategory3/',
   //获取分类下已有的属性与属性值
-  ATTR_URL = '/admin/product/attrInfoList/',
+  ATTR_URL = '/api/admin/product/attrInfoList/',
   //添加或者修改已有的属性的接口
-  ADDORUPDATEATTR_URL = '/admin/product/saveAttrInfo',
+  ADDORUPDATEATTR_URL = '/api/admin/product/saveAttrInfo',
   //删除某一个已有的属性
-  DELETEATTR_URL = '/admin/product/deleteAttr/',
+  DELETEATTR_URL = '/api/admin/product/deleteAttr/',
 }
 
 //获取一级分类的接口方法

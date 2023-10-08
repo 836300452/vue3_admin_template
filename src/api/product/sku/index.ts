@@ -4,15 +4,15 @@ import type { SkuResponseData, SkuInfoData } from './type'
 //枚举地址
 enum API {
   //获取已有的商品的数据-SKU
-  SKU_URL = '/admin/product/list/',
+  SKU_URL = '/api/admin/product/list/',
   //上架
-  SALE_URL = '/admin/product/onSale/',
+  SALE_URL = '/api/admin/product/onSale/',
   //下架的接口
-  CANCELSALE_URL = '/admin/product/cancelSale/',
+  CANCELSALE_URL = '/api/admin/product/cancelSale/',
   //获取商品详情的接口
-  SKUINFO_URL = '/admin/product/getSkuInfo/',
+  SKUINFO_URL = '/api/admin/product/getSkuInfo/',
   //删除已有的商品
-  DELETESKU_URL = '/admin/product/deleteSku/',
+  DELETESKU_URL = '/api/admin/product/deleteSku/',
 }
 //获取商品SKU的接口
 export const reqSkuList = (page: number, limit: number) =>
